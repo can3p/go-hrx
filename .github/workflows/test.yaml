@@ -10,8 +10,10 @@ jobs:
         go: [1.22]
     steps:
       - name: checkout
-        uses: actions/checkout@v2
-        with: { fetch-depth: 1 }
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          submodules: true
 
       - name: go
         uses: actions/setup-go@v3
