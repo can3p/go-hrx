@@ -42,23 +42,36 @@ func TestSpec(t *testing.T) {
 	t.Log(testFiles)
 	assert.Positive(t, len(testFiles))
 
-	for idx, fname := range testFiles {
+	onlyFile := os.Getenv("ONLY_FILE")
+	onlyFileFound := false
+
+	for _, fname := range testFiles {
+		if onlyFile != "" {
+			if onlyFile != fname {
+				continue
+			}
+			onlyFileFound = true
+		}
+
 		dirname, found := strings.CutSuffix(fname, ".hrx")
-		require.Truef(t, found, "[example %d]", idx+1)
+		require.Truef(t, found, "[example %s]", fname)
+
+		fullHrxPath := path.Join(hrxPath, fname)
 		resultFolder := path.Join(extractedPath, dirname)
 
-		reader, err := hrx.OpenReader(fname)
+		reader, err := hrx.OpenReader(fullHrxPath)
 
-		assert.NoErrorf(t, err, "[example %d]", idx+1)
+		assert.NoErrorf(t, err, "[example %s]", fullHrxPath)
 
 		if err != nil {
 			continue
 		}
 
-		equal, err := DirsEqual(os.DirFS(resultFolder), reader)
-		assert.NoErrorf(t, err, "[example %d]", idx+1)
-		assert.Truef(t, equal, "[example %d]", idx+1)
+		err = DirsEqual(os.DirFS(resultFolder), reader)
+		assert.NoErrorf(t, err, "[example %s]", fullHrxPath)
 	}
+
+	require.True(t, onlyFile == "" || onlyFileFound, "ONLY_FILE environment is set, but no file matches it")
 }
 
 func TestSpecInvalid(t *testing.T) {
@@ -68,9 +81,11 @@ func TestSpecInvalid(t *testing.T) {
 	t.Log(testFiles)
 	assert.Positive(t, len(testFiles))
 
-	for idx, fname := range testFiles {
-		_, err := hrx.OpenReader(fname)
+	for _, fname := range testFiles {
+		fullHrxPath := path.Join(hrxPath, fname)
 
-		assert.Errorf(t, err, "[example %d]", idx+1)
+		_, err := hrx.OpenReader(fullHrxPath)
+
+		assert.Errorf(t, err, "[example %s]", fullHrxPath)
 	}
 }

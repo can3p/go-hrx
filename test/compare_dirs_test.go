@@ -113,9 +113,7 @@ func TestDirsEqual(t *testing.T) {
 	}
 
 	for idx, ex := range ex {
-		equal, err := DirsEqual(ex.dir1, ex.dir2)
-		assert.NoErrorf(t, err, "[example %d]", idx+1)
-
-		assert.Equalf(t, ex.equal, equal, "[example %d]", idx+1)
+		err := DirsEqual(ex.dir1, ex.dir2)
+		assert.Equalf(t, ex.equal, err == nil, "[example %d]", idx+1)
 	}
 }
